@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Operation Research 1</title>
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --card: #ffffff;
+        --accent: #0b5cff;
+        --muted: #6b7280;
+      }
+      body {
+        font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 24px;
+        color: #0b1220;
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      p.lead {
+        margin: 4px 0 20px;
+        color: var(--muted);
+      }
+      .card {
+        background: var(--card);
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(12, 24, 48, 0.06);
+        padding: 18px;
+      }
+      .q {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #eef2ff;
+      }
+      .q h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .opts {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      label.opt {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      input[type="radio"] {
+        width: 16px;
+        height: 16px;
+      }
+      .result {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f3f7ff;
+        border: 1px solid #dbe8ff;
+      }
+      .correct {
+        background: #e6ffef;
+        border-color: #b9f2d0;
+      }
+      .wrong {
+        background: #fff0f0;
+        border-color: #ffd2d2;
+      }
+      .score {
+        font-weight: 700;
+        font-size: 18px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 14px;
+      }
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: 0;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #f3f4f6;
+        color: #0b1220;
+      }
+      .feedback {
+        margin-top: 12px;
+      }
+      small.hint {
+        color: var(--muted);
+      }
+      footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div>
+          <h1>Operation Research — Quiz (Auto-grade)</h1>
+          <p class="lead">
+            Answer all questions then press <strong>Submit</strong> to grade.
+            You can reset anytime.
+          </p>
+        </div>
+      </header>
+
+      <div class="card" id="quizCard">
+        <div id="quiz"></div>
+
+        <div class="controls">
+          <button id="submitBtn">Submit</button>
+          <button id="resetBtn" class="secondary" type="button">Reset</button>
+          <div style="margin-left: auto">
+            <small class="hint">Questions: 70</small>
+          </div>
+        </div>
+
+        <div id="summary" class="feedback"></div>
+      </div>
+
+      <footer>all rights reserved to khaled :P</footer>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          q: "1. A feasible solution to a linear programming problem ______________.",
+          opts: [
+            "A) must satisfy all the constraints of the problem simultaneously",
+            "B) need not satisfy all of the constraints, only some of them",
+            "C) must be a corner point of the feasible region.",
+            "D) must optimize the value of the objective function",
+          ],
+          ans: "A",
+        },
+        {
+          q: "2. If any value in XB column of final simplex table is negative, then the solution is ______________.",
+          opts: [
+            "A) feasible",
+            "B) Infeasible",
+            "C) Bounded",
+            "D) no solution",
+          ],
+          ans: "B",
+        },
+        {
+          q: "3. For any primal problem and its dual______________.",
+          opts: [
+            "A) optimal value of objective function is same",
+            "B) dual will have an optimal solution if primal does too",
+            "C) primal will have an optimal solution if dual does too",
+            "D) both primal and dual cannot be infeasible",
+          ],
+          ans: "A",
+        },
+        {
+          q: "4. An optimal assignment requires that the maximum number of lines which can be drawn through squares with zero opportunity cost should be equal to the number of ______________.",
+          opts: [
+            "A) rows or columns",
+            "B) rows and columns",
+            "C) rows+columns- 1",
+            "D) rows-columns.",
+          ],
+          ans: "A",
+        },
+        {
+          q: "5. To proceed with the Modified Distribution method algorithm for solving a transportation problem, the number of dummy allocations need to be added are______________.",
+          opts: ["A) N", "B) n-1", "C) 2n-1", "D) n-2"],
+          ans: "B",
+        },
+        {
+          q: "6. The objective of network analysis is to______________.",
+          opts: [
+            "A) minimize total project duration",
+            "B) minimize total project cost",
+            "C) minimize production delays, interruption and conflicts",
+            "D) maximize total project duration",
+          ],
+          ans: "C",
+        },
+        {
+          q: "7. If there is no non-negative replacement ratio in solving a Linear Programming Problem then the solution is ______________.",
+          opts: ["A) Feasible", "B) Bounded", "C) Unbounded", "D) Infinite"],
+          ans: "C",
+        },
+        {
+          q: "8. In marking assignments, which of the following should be preferred?",
+          opts: [
+            "A) Only row having single zero",
+            "B) Only column having single zero",
+            "C) Only row/column having single zero",
+            "D) Column having more than one zero",
+          ],
+          ans: "C",
+        },
+        {
+          q: "9. _____________ is a mathematical technique used to solve the problem of allocating limited resource among the competing activities",
+          opts: [
+            "A) Linear Programming problem",
+            "B) Assignment Problem",
+            "C) Replacement Problem",
+            "D) Non-linear Programming Problem",
+          ],
+          ans: "A",
+        },
+        {
+          q: "10. In Linear Programming Problem functions to be maximized or minimized are called ______________.",
+          opts: [
+            "A) Constraints",
+            "B) objective function",
+            "C) basic solution",
+            "D) feasible solution",
+          ],
+          ans: "B",
+        },
+        {
+          q: "11. If the primal problem has n constraints and m variables then the number of constraints in the dual problem is ______________.",
+          opts: ["A) m", "B) n", "C) m-n", "D) m/n"],
+          ans: "A",
+        },
+        {
+          q: "12. The assignment algorithm was developed by ______________ method.",
+          opts: [
+            "A) HUNGARIAN",
+            "B) VOGELS",
+            "C) MODI",
+            "D) TRAVELING SALES MAN",
+          ],
+          ans: "A",
+        },
+        {
+          q: "13. The assignment problem is always a ______________matrix.",
+          opts: ["A) Circle", "B) Square", "C) Rectangle", "D) Triangle"],
+          ans: "B",
+        },
+        {
+          q: "14. Mathematical model of linear programming problem is important because ______________.",
+          opts: [
+            "A) it helps in converting the verbal description and numerical data into mathematical expression",
+            "B) decision makers prefer to work with formal models",
+            "C) it captures the relevant relationship among decision factors",
+            "D) it enables the use of algebraic technique",
+          ],
+          ans: "A",
+        },
+        {
+          q: "15. While solving a linear programming problem infeasibility may be removed by ______________.",
+          opts: [
+            "A) adding another constraint",
+            "B) adding another variable",
+            "C) removing a constraint",
+            "D) removing a variable",
+          ],
+          ans: "C",
+        },
+        {
+          q: "16. The right-hand side constant of a constraint in a primal problem appears in the corresponding dual as______________.",
+          opts: [
+            "A) a coefficient in the objective function",
+            "B) a right-hand side constant of a function",
+            "C) an input output coefficient a left-hand side constraint",
+            "D) coefficient variable",
+          ],
+          ans: "A",
+        },
+        {
+          q: "17. Maximization assignment problem is transformed into a minimization problem by______________.",
+          opts: [
+            "A) adding each entry in a column from the maximum value in that column",
+            "B) subtracting each entry in a column from the maximum value in that column",
+            "C) subtracting each entry in the table from the maximum value in that table",
+            "D) adding each entry in the table from the maximum value in that table",
+          ],
+          ans: "C",
+        },
+        {
+          q: "18. The transportation problem deals with the transportation of ______________.",
+          opts: [
+            "A) a single product from a source to several destinations",
+            "B) a single product from several sources to several destinations",
+            "C) a single product from several sources to a destination",
+            "D) a multi -product from several sources to several destinations",
+          ],
+          ans: "B",
+        },
+        {
+          q: "19. In the network, one activity may connect any ______________ nodes",
+          opts: ["A) 1", "B) 2", "C) 3", "D) 4"],
+          ans: "B",
+        },
+        {
+          q: "20. Graphical method is also known as ______________.",
+          opts: [
+            "A) Simplex Method",
+            "B) Dual Simplex Method",
+            "C) Big-M Method",
+            "D) Search-Approach Method",
+          ],
+          ans: "D",
+        },
+        {
+          q: "21. When the total demand is equal to supply then the transportation problem is said to be ______________",
+          opts: [
+            "A) balanced",
+            "B) unbalanced",
+            "C) maximization",
+            "D) minimization",
+          ],
+          ans: "A",
+        },
+        {
+          q: "22. Linear Programming Problem is a technique of finding the ______________.",
+          opts: [
+            "A) optimal value",
+            "B) approximate value",
+            "C) initial value",
+            "D) infeasible value",
+          ],
+          ans: "A",
+        },
+        {
+          q: "23. Any solution to a Linear Programming Problem which also satisfies the non- negative notifications of the problem has ______________.",
+          opts: [
+            "A) solution",
+            "B) basic solution",
+            "C) basic feasible solution",
+            "D) feasible solution",
+          ],
+          ans: "D",
+        },
+        {
+          q: "24. The cost of a slack variable is ______________",
+          opts: ["A) 0", "B) 1", "C) 2", "D) -1"],
+          ans: "A",
+        },
+        {
+          q: "25. Linear Programming Problem that can be solved by graphical method has ______________.",
+          opts: [
+            "A) linear constraints",
+            "B) quadratic constraints",
+            "C) nonlinear constraints",
+            "D) bi-quadratic constraints",
+          ],
+          ans: "A",
+        },
+        {
+          q: "26. If one or more variable vanish then a basic solution to the system is called ______________.",
+          opts: [
+            "A) non feasible region",
+            "B) feasible region",
+            "C) degenerate solution",
+            "D) basic solution",
+          ],
+          ans: "C",
+        },
+        {
+          q: "27. A Linear Programming Problem have ______________ optimal solution",
+          opts: ["A) 1", "B) 2", "C) more than 1", "D) more than 2"],
+          ans: "A",
+        },
+        {
+          q: "28. Chose the correct statement: A degenerate solution is one that______________.",
+          opts: [
+            "A) gives an optimum solution to the Linear Programming Problem",
+            "B) gives zero value to one or more of the basic variables",
+            "C) yields more than one way to achieve the objective",
+            "D) makes use of all available resources",
+          ],
+          ans: "B",
+        },
+        {
+          q: "29. At any iteration of the usual simplex method, if there is at least one basic variable in the basis at zero level and all the index numbers are non-negative, the current solution is ______________.",
+          opts: [
+            "A) basic solution",
+            "B) non basic solution",
+            "C) degenerate",
+            "D) non degenerate",
+          ],
+          ans: "C",
+        },
+        {
+          q: "30. In a network diagram an event is denoted by the symbol ______________.",
+          opts: ["A) Arrow", "B) straight line", "C) curve", "D) circle"],
+          ans: "D",
+        },
+        {
+          q: "31. An ______________ represent the start or completion of some activity and as such it consumes no time",
+          opts: ["A) activity", "B) event", "C) slack", "D) path"],
+          ans: "B",
+        },
+        {
+          q: "32. ____________ is used for non-repetitive jobs",
+          opts: ["A) Queue", "B) Replacement", "C) CPM", "D) PERT"],
+          ans: "D",
+        },
+        {
+          q: "33. The assignment problem will have alternate solutions when the total opportunity cost matrix has ______________",
+          opts: [
+            "A) atleast one zero in each row and column",
+            "B) when all rows have two zeros",
+            "C) when there is a tie between zero opportunity cost cells",
+            "D) if two diagonal elements are zeros.",
+          ],
+          ans: "C",
+        },
+        {
+          q: "34. The region common to all the constraints including the non-negativity restrictions is called the ______________.",
+          opts: [
+            "A) solution space",
+            "B) unique solution",
+            "C) optimum solution",
+            "D) infeasible solution",
+          ],
+          ans: "A",
+        },
+        {
+          q: "35. A activity in a network diagram is said to be ______________ if the delay in its start will further delay the project completion time.",
+          opts: [
+            "A) forward pass",
+            "B) backward pass",
+            "C) critical.",
+            "D) non-critical.",
+          ],
+          ans: "C",
+        },
+        {
+          q: "36. Operation research approach is typically based on the use of ______________.",
+          opts: [
+            "A) physical model.",
+            "B) mathematical model.",
+            "C) iconic model.",
+            "D) descriptive model.",
+          ],
+          ans: "B",
+        },
+        {
+          q: "37. An Iso-profit line represents ______________.",
+          opts: [
+            "A) a boundary of the feasible region",
+            "B) an infinite number of solutions all of which yield the same cost",
+            "C) an infinite number of solutions all of which yield the same profit",
+            "D) an infinite number of optimal solutions",
+          ],
+          ans: "C",
+        },
+        {
+          q: "38. The assignment problem is a special case of transportation problem in which ______________.",
+          opts: [
+            "A) number of origins are less than the number of destinations",
+            "B) number of origins are greater than the number of destinations",
+            "C) number of origins are greater than or equal to the number of destinations",
+            "D) number of origins equals the number of destinations",
+          ],
+          ans: "D",
+        },
+        {
+          q: "39. In the transportation table, empty cells will be called ______________.",
+          opts: ["A) Occupied", "B) Unoccupied", "C) No", "D) finite"],
+          ans: "B",
+        },
+        {
+          q: "40. ____________ is a completely degenerate form of a transportation problem",
+          opts: [
+            "A) Transportation Problem",
+            "B) Assignment Problem",
+            "C) Travelling salesman problem",
+            "D) Replacement Problem",
+          ],
+          ans: "B",
+        },
+        {
+          q: "41. While solving an assignment problem, an activity is assigned to a resource through a square with zero opportunity cost because the objective is to______________.",
+          opts: [
+            "A) minimize total cost of assignment.",
+            "B) reduce the cost of assignment to zero",
+            "C) reduce the cost of that particular assignment to zero",
+            "D) reduce total cost of assignment",
+          ],
+          ans: "A",
+        },
+        {
+          q: "42. In an assignment problem involving 5 workers and 5 jobs, total number of assignments possible are ______________.",
+          opts: ["A) 5", "B) 10", "C) 15", "D) 20"],
+          ans: "A",
+        },
+        {
+          q: "43. Graphical method of linear programming is useful when the number of decision variable are ______________",
+          opts: ["A) 2", "B) 3", "C) 4", "D) 5"],
+          ans: "A",
+        },
+        {
+          q: "44. The cost of a surplus variable is ______________.",
+          opts: ["A) 0", "B) 1", "C) 2", "D) -1"],
+          ans: "D",
+        },
+        {
+          q: "45. The dual of the dual is ______________.",
+          opts: ["A) dual-primal", "B) primal-dual", "C) dual", "D) primal"],
+          ans: "D",
+        },
+        {
+          q: "46. Solution of a Linear Programming Problem when permitted to be infinitely large is called ______________.",
+          opts: [
+            "A) unbounded",
+            "B) bounded",
+            "C) optimise solution",
+            "D) no solution",
+          ],
+          ans: "A",
+        },
+        {
+          q: "47. When the total demand is not equal to supply then it is said to be ______________.",
+          opts: [
+            "A) balanced",
+            "B) unbalanced",
+            "C) maximization",
+            "D) minimization",
+          ],
+          ans: "B",
+        },
+        {
+          q: "48. All equality constraints can be replaced equivalently by ______________ inequalities",
+          opts: ["A) 1", "B) 2", "C) 3", "D) 4"],
+          ans: "B",
+        },
+        {
+          q: "49. If the primal has an unbound objective function value, then the dual has ______________.",
+          opts: [
+            "A) solution",
+            "B) basic solution",
+            "C) basic feasible solution",
+            "D) no feasible solution",
+          ],
+          ans: "D",
+        },
+        {
+          q: "50. If there is no non-negative replacement ratio in a solution which is sought to be improved, then the solution is ______________.",
+          opts: [
+            "A) bounded",
+            "B) unbounded",
+            "C) no solution",
+            "D) alternative solution",
+          ],
+          ans: "B",
+        },
+        {
+          q: "51. A project consists of a number of tasks which are called ______________.",
+          opts: ["A) activities", "B) floats", "C) events", "D) paths"],
+          ans: "A",
+        },
+        {
+          q: "52. An activity is represented by a/an ______________.",
+          opts: ["A) arrow", "B) straight line", "C) curve", "D) arc"],
+          ans: "A",
+        },
+        {
+          q: "53. The similarity between assignment problem and transportation problem is ______________.",
+          opts: [
+            "A) both are rectangular matrices",
+            "B) both are square matrices",
+            "C) both can be solved y graphical method",
+            "D) both have objective function and non-negativity constraints",
+          ],
+          ans: "D",
+        },
+        {
+          q: "54. The penalty for not taking correct decision is known as ______________.",
+          opts: ["A) fine", "B) loss", "C) cost", "D) opportunity cost"],
+          ans: "D",
+        },
+        {
+          q: "55. The area bounded by all the given constraints is called ______________.",
+          opts: [
+            "A) feasible region",
+            "B) basic solution",
+            "C) non feasible region",
+            "D) optimum basic feasible solution",
+          ],
+          ans: "A",
+        },
+        {
+          q: "56. Consider the linear equation 2 x1 + 3 x2 - 4 x3 + 5 x4 = 10. How many basic and non-basic variables are defined by this equation?",
+          opts: [
+            "A) One variable is basic, three variables are non-basic",
+            "B) Two variables are basic, two variables are non-basic",
+            "C) Three variables are basic, one variable is non-basic",
+            "D) All four variables are basic",
+          ],
+          ans: "A",
+        },
+        {
+          q: "57. Feasible solution satisfies __________",
+          opts: [
+            "A) constraints",
+            "B) non-negative restriction",
+            "C) [a] and [b] both",
+            "D) [a] , [b] and Optimum solution",
+          ],
+          ans: "C",
+        },
+        {
+          q: "58. In a transportation problem, we must make the number of __________ and __________ equal.",
+          opts: [
+            "A) units supplied; units demanded",
+            "B) columns; rows",
+            "C) positive cost coefficients; negative cost coefficients",
+            "D) warehouses; suppliers",
+          ],
+          ans: "A",
+        },
+        {
+          q: "59. Which of the following is a method used in making decisions with operations research?",
+          opts: [
+            "A) Studying the workforce",
+            "B) Analyzing situations",
+            "C) Accounting for the human element",
+            "D) Mathematical methods",
+          ],
+          ans: "D",
+        },
+        {
+          q: "60. In assignment problem of maximization, the objective is to maximize",
+          opts: [
+            "A) Profit",
+            "B) optimization",
+            "C) cost",
+            "D) None of the above",
+          ],
+          ans: "A",
+        },
+        {
+          q: "61. In graphical representation the bounded region is known as __________ region.",
+          opts: [
+            "A) Solution",
+            "B) basic solution",
+            "C) feasible solution",
+            "D) optimal",
+          ],
+          ans: "C",
+        },
+        {
+          q: "62. In operations research, the __________ are prepared for situations.",
+          opts: [
+            "A) mathematical models",
+            "B) physical models diagrammatic",
+            "C) diagrammatic models",
+            "D) all of above",
+          ],
+          ans: "A",
+        },
+        {
+          q: "63. One disadvantage of using North-West Corner rule to find initial solution to the transportation problem is that",
+          opts: [
+            "A) It is complicated to use",
+            "B) It does not take into account cost of transportation",
+            "C) It leads to a degenerate initial solution",
+            "D) All of the above",
+          ],
+          ans: "B",
+        },
+        {
+          q: "64. Operations management can be defined as the application of __________ to a problem within a system to yield the optimal solution.",
+          opts: [
+            "A) Suitable manpower",
+            "B) mathematical techniques, models, and tools",
+            "C) Financial operations",
+            "D) all of above",
+          ],
+          ans: "B",
+        },
+        {
+          q: "65. Operations research is based upon collected information, knowledge and advanced study of various factors impacting a particular operation. This leads to more informed __________.",
+          opts: [
+            "A) Management processes",
+            "B) Decision making",
+            "C) Procedures",
+            "D) all of above",
+          ],
+          ans: "B",
+        },
+        {
+          q: "66. OR can evaluate only the effects of __________.",
+          opts: [
+            "A) Personnel factors.",
+            "B) Financial factors",
+            "C) Numeric and quantifiable factors.",
+            "D) all of above",
+          ],
+          ans: "C",
+        },
+        {
+          q: "67. The method of finding an initial solution based upon opportunity costs is called __________.",
+          opts: [
+            "A) the northwest corner rule",
+            "B) Vogel's approximation",
+            "C) Johanson's theorem",
+            "D) Hungarian method",
+          ],
+          ans: "B",
+        },
+        {
+          q: "68. The purpose of a dummy source or dummy destination in a transportation problem is to",
+          opts: [
+            "A) prevent the solution from becoming degenerate.",
+            "B) obtain a balance between total supply and total demand.",
+            "C) make certain that the total cost does not exceed some specified figure.",
+            "D) provide a means of representing a dummy problem.",
+          ],
+          ans: "B",
+        },
+        {
+          q: "69. Integer linear program A linear program with the additional requirement that one or more of the variables must be integer. (True/False)",
+          opts: ["A) True", "B) False"],
+          ans: "A",
+        },
+        {
+          q: "70. The Integer Linear Programming (ILP) may be",
+          opts: [
+            "A) PURE-integer programming",
+            "B) Mixed-integer linear programming",
+            "C) 0-1 integer linear programming",
+            "D) All of the above",
+          ],
+          ans: "D",
+        },
+      ];
+
+      const quizDiv = document.getElementById("quiz");
+
+      function renderQuiz() {
+        quizDiv.innerHTML = "";
+        questions.forEach((item, idx) => {
+          const qDiv = document.createElement("div");
+          qDiv.className = "q";
+          qDiv.id = "q" + (idx + 1);
+          const h = document.createElement("h3");
+          h.textContent = item.q;
+          qDiv.appendChild(h);
+
+          const optsDiv = document.createElement("div");
+          optsDiv.className = "opts";
+          item.opts.forEach((opt, j) => {
+            const label = document.createElement("label");
+            label.className = "opt";
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = "q" + idx;
+            radio.value = String.fromCharCode(65 + j);
+            const span = document.createElement("span");
+            span.textContent = opt;
+            label.appendChild(radio);
+            label.appendChild(span);
+            optsDiv.appendChild(label);
+          });
+          qDiv.appendChild(optsDiv);
+          quizDiv.appendChild(qDiv);
+        });
+      }
+
+      function grade() {
+        let correct = 0;
+        questions.forEach((item, idx) => {
+          const selected = document.querySelector(
+            'input[name="q' + idx + '"]:checked'
+          );
+          const qElem = document.getElementById("q" + (idx + 1));
+          qElem.classList.remove("correct", "wrong");
+          if (selected) {
+            const val = selected.value;
+            if (val === item.ans) {
+              correct++;
+              qElem.classList.add("correct");
+            } else {
+              qElem.classList.add("wrong");
+            }
+          } else qElem.classList.add("wrong");
+        });
+        const total = questions.length;
+        const percent = Math.round((correct / total) * 100);
+        const gradeLetter =
+          percent >= 90
+            ? "A"
+            : percent >= 80
+            ? "B"
+            : percent >= 70
+            ? "C"
+            : percent >= 60
+            ? "D"
+            : "F";
+        document.getElementById("summary").innerHTML =
+          '<div class="result"><div class="score">Score: ' +
+          correct +
+          "/" +
+          total +
+          " (" +
+          percent +
+          "%) — Grade: " +
+          gradeLetter +
+          "</div></div>";
+      }
+
+      function resetQuiz() {
+        document
+          .querySelectorAll("input[type=radio]")
+          .forEach((r) => (r.checked = false));
+        document
+          .querySelectorAll(".q")
+          .forEach((q) => q.classList.remove("correct", "wrong"));
+        document.getElementById("summary").innerHTML = "";
+      }
+
+      renderQuiz();
+      document.getElementById("submitBtn").addEventListener("click", grade);
+      document.getElementById("resetBtn").addEventListener("click", resetQuiz);
+    </script>
+  </body>
+</html>
